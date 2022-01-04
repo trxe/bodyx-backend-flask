@@ -1,9 +1,8 @@
-import mongoengine.errors
-
-import services.data_service as svc
-from data.mongo_setup import global_init
-from data.show import Show
 from dotenv import load_dotenv
+
+import commands.show_handlers as show_cmd
+import commands.session_handlers as session_cmd
+from data.mongo_setup import global_init
 
 
 def print_cmds():
@@ -13,7 +12,8 @@ def print_cmds():
     # print("[show] [session] -u: update show/session")
     # print("[show] [session] -d: delete show/session")
     print("[show] [session] -l: list shows/session")
-    print("[quit]")
+    print("help: shows this page")
+    print("quit")
 
 
 def parse_cmds(raw: str):
@@ -26,59 +26,25 @@ def parse_cmds(raw: str):
         return False
     elif len(cmd) == 1:
         print("cmd not found")
-    elif cmd[1] == "c":
-        create_show()
-    elif cmd[1] == "r":
-        find_show()
-    elif cmd[1] == "l":
-        list_shows()
+    elif cmd[0] == "show":
+        if cmd[1] == "c":
+            show_cmd.create_show()
+        elif cmd[1] == "r":
+            show_cmd.find_show()
+        elif cmd[1] == "l":
+            show_cmd.list_shows()
+    elif cmd[0] == "help":
+        print_cmds()
+    elif cmd[0] == "session":
+        if cmd[1] == "c":
+            session_cmd.create_session()
+        elif cmd[1] == "r":
+            session_cmd.list_sessions_by_show()
+        elif cmd[1] == "l":
+            session_cmd.list_sessions()
     else:
         print("cmd not found")
     return True
-
-
-def print_show(show: Show):
-    print(f" * {show.enTitle} {show.cnTitle} {show.durationMins} mins -- {show.id}")
-
-
-def generate_room():
-    is_adding = input("add new room? [Y/N] ")
-    if is_adding == "N":
-        return None
-    room_name = input("enter room name: ")
-    room_url = input("enter url: ")
-    return {"roomName": room_name, "roomUrl": room_url}
-
-
-def create_show():
-    en_title = input("enter english title: ")
-    cn_title = input("enter chinese title: ")
-    duration_mins = input("enter duration in minutes: ")
-    print("enter default rooms: ")
-    rooms = []
-    try:
-        show = svc.create_show(en_title, cn_title, duration_mins, rooms)
-        print("show created:", show)
-    except mongoengine.errors.NotUniqueError:
-        print("Error: show with identical english title found")
-
-
-def find_show():
-    title = input("enter title to search: ")
-    shows_found = svc.find_shows(title)
-    if len(shows_found) == 0:
-        print(f"no shows found with title {title}")
-        return
-    print("shows: ")
-    for show in shows_found:
-        print_show(show)
-
-
-def list_shows():
-    shows = svc.list_shows()
-    print("shows: ")
-    for show in shows:
-        print_show(show)
 
 
 def main():
