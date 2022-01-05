@@ -89,7 +89,7 @@ class TestDataService(unittest.TestCase):
         show_b = svc.create_show("showB", "cnB", 120, [])
         show_search_id = svc.find_shows("showB")[0].id
         print("search id:", show_search_id)
-        s = svc.find_shows_id(show_search_id)
+        s = svc.find_show_id(show_search_id)
         print(f"{s.id}: {s.enTitle} {s.cnTitle}, {s.durationMins}")
         self.assertEqual(show_b, s)
 

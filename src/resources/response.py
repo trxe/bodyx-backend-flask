@@ -6,3 +6,11 @@ class Response:
 
     def to_json(self):
         return self.__dict__
+
+
+def error_json(e: Exception) -> str:
+    return Response(error="[ERROR] " + str(e)).to_json()
+
+
+def success_json(msg: str, data) -> str:
+    return Response(msg=msg, data=data).to_json()

@@ -1,3 +1,4 @@
+import bson.errors
 from bson.objectid import ObjectId
 import copy
 import datetime
@@ -5,18 +6,27 @@ import datetime
 from data.show import Show
 from data.session import Session
 from data.room import Room
-from exceptions.exceptions import NotFoundError
+from exceptions.exceptions import NotFoundError, InvalidIdError
 
 
-def create_show(en_title: str, cn_title: str, duration_mins: int, default_rooms: list) -> Show:
+def reset_shows() -> None:
+    Show.drop_collection()
+
+
+def reset_sessions() -> None:
+    Session.drop_collection()
+
+
+def create_show(en_title: str, cn_title: str, duration_mins: int, default_rooms: list[dict]) -> Show:
     show = Show()
     show.enTitle = en_title
     show.cnTitle = cn_title
     show.durationMins = duration_mins
     for rawRoom in default_rooms:
         room = Room()
-        room.title = rawRoom["title"]
-        room.url = rawRoom["url"]
+        room.title = rawRoom.get("title")
+        room.url = rawRoom.get("url")
+        room.isUnlocked = rawRoom.get("isUnlocked")
         show.defaultRooms.append(room)
 
     show.save()
@@ -60,17 +70,31 @@ def get_show_dict(show: Show) -> dict:
     }
 
 
+def get_session_dict(session: Session) -> dict:
+    return {
+        "dateTime": str(session.dateTime),
+        "eventId": session.eventId,
+        "isPlaying": session.isPlaying,
+        "showId": str(session.showId),
+        "rooms": list(map(get_room_dict, session.rooms)),
+        "id": str(session.id),
+    }
+
+
 def list_shows() -> list:
     return list(Show.objects())
 
 
 def delete_show(show_id: str) -> None:
-    show = find_shows_id(show_id)
+    show = find_show_id(show_id)
     show.delete()
 
 
-def find_shows_id(search: str) -> Show:
-    query = list(Show.objects(id=ObjectId(search)))
+def find_show_id(search: str) -> Show:
+    try:
+        query = list(Show.objects(id=ObjectId(search)))
+    except bson.errors.InvalidId as e:
+        raise InvalidIdError(invalid_id=search)
     if len(query) == 0:
         raise NotFoundError(f"Show with id {search} not found")
     return query[0]
@@ -89,7 +113,7 @@ def create_session(date_time: datetime, event_id: str, show_id: str) -> Session:
     session.showId = ObjectId(show_id)
     session.isPlaying = False
 
-    show = find_shows_id(show_id)
+    show = find_show_id(show_id)
     session.rooms = copy.deepcopy(show.defaultRooms)
 
     session.save()
@@ -99,15 +123,17 @@ def create_session(date_time: datetime, event_id: str, show_id: str) -> Session:
 def create_session_rooms(session: Session, rooms: list[dict]) -> Session:
     for rawRoom in rooms:
         room = Room()
-        room.title = rawRoom["title"]
-        room.url = rawRoom["url"]
+        room.title = rawRoom.get("title")
+        room.url = rawRoom.get("url")
+        room.isUnlocked = rawRoom.get("isUnlocked")
         session.rooms.append(room)
 
     session.save()
     return session
 
 
-def update_session(session: Session, date_time=None, event_id=None, is_playing=None, show_id=None, updated_rooms=None):
+def update_session(session: Session, date_time=None, event_id=None, is_playing=None,
+                   show_id=None, updated_rooms=None) -> None:
     if date_time is not None:
         session.dateTime = date_time
     if event_id is not None:
@@ -120,8 +146,9 @@ def update_session(session: Session, date_time=None, event_id=None, is_playing=N
         session.rooms = []
         for rawRoom in updated_rooms:
             room = Room()
-            room.title = rawRoom["title"]
-            room.url = rawRoom["url"]
+            room.title = rawRoom.get("title")
+            room.url = rawRoom.get("url")
+            room.isUnlocked = rawRoom.get("isUnlocked")
             session.rooms.append(room)
 
     session.save()
@@ -137,7 +164,15 @@ def list_sessions_by_show(search: str) -> list:
 
 
 def find_session_id(search: str) -> Session:
-    query = list(Session.objects(id=ObjectId(search)))
+    try:
+        query = list(Session.objects(id=ObjectId(search)))
+    except bson.errors.InvalidId as e:
+        raise InvalidIdError(invalid_id=search)
     if len(query) == 0:
-        return None
+        raise NotFoundError(f"Show with id {search} not found")
     return query[0]
+
+
+def delete_session(session_id):
+    session = find_session_id(session_id)
+    session.delete()

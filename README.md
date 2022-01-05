@@ -41,7 +41,7 @@ All responses should have the form
 **Response** 
 
 - `201 Created` on success
-- `405 Method not allowed` if identical `enTitle` and `cnTitle`
+- `400` if invalid inputs
 
 ```json
 {

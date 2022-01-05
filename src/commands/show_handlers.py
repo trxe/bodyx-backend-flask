@@ -51,7 +51,7 @@ def delete_show():
 def find_show_id():
     show_id = input("enter show id to search: ")
     try:
-        show_found = svc.find_shows_id(show_id)
+        show_found = svc.find_show_id(show_id)
         print("shows:")
         print_show(show_found)
     except Exception as e:

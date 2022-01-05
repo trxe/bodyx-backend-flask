@@ -1,31 +1,64 @@
-from flask_restful import Resource, reqparse
+from flask import request
+from flask_restful import Resource
 
 import services.data_service as svc
+from resources.response import error_json, success_json
+from exceptions.exceptions import NotFoundError, InvalidIdError
 
-show_info_args = reqparse.RequestParser()
-show_info_args.add_argument("enTitle", type=str, help="Enter a unique english title for this show.")
-show_info_args.add_argument("cnTitle", type=str, help="Enter a chinese title for this show.")
-show_info_args.add_argument("durationMins", type=int, help="Enter the duration (mins) of this show.")
-show_info_args.add_argument("defaultRooms", type=list[dict], help="Enter default rooms of this show.")
+
+def retrieve_show_args(args) -> tuple:
+    en_title = args.get("enTitle")
+    cn_title = args.get("cnTitle")
+    duration_mins = args.get("durationMins")
+    default_rooms = args.get("defaultRooms")
+    return en_title, cn_title, duration_mins, default_rooms
 
 
 class Show(Resource):
     @staticmethod
     def get(show_id=None):
         if show_id is not None:
-            return svc.get_show_dict(svc.list_shows()[show_id])
-        return list(map(svc.get_show_dict, svc.list_shows()))
+            try:
+                shows = svc.list_sessions_by_show(show_id)
+                return success_json("Found show", list(map(svc.get_show_dict, shows)))
+            except NotFoundError as e:
+                return error_json(e), 404
+            except InvalidIdError as e:
+                return error_json(e), 403
+        return success_json("Found shows:", list(map(svc.get_show_dict, svc.list_shows())))
 
     @staticmethod
     def post():
-        args = show_info_args.parse_args()
-        return {"show": args}, 201
+        try:
+            args = request.json
+            en_title, cn_title, duration_mins, default_rooms = retrieve_show_args(args)
+            show = svc.create_show(en_title, cn_title, duration_mins, default_rooms)
+            return success_json(f"Created new show {show.id}", svc.get_show_dict(show)), 201
+        except Exception as e:
+            return error_json(e), 400
 
     @staticmethod
     def put(show_id):
-        args = show_info_args.parse_args()
-        return {show_id: args}, 201
+        try:
+            show = svc.find_show_id(show_id)
+        except NotFoundError as e:
+            return error_json(e), 404
+        except InvalidIdError as e:
+            return error_json(e), 403
+        args = request.json
+        en_title, cn_title, duration_mins, default_rooms = retrieve_show_args(args)
+        try:
+            svc.update_show(show, en_title, cn_title, duration_mins, default_rooms)
+        except Exception as e:
+            return error_json(e), 400
+        return success_json(f"Edited show {show.id}", svc.get_show_dict(show)), 201
 
     @staticmethod
-    def delete(show_id):
-        return show_id, 204
+    def delete(show_id=None):
+        if not show_id:
+            svc.reset_shows()
+        try:
+            svc.delete_show(show_id)
+        except NotFoundError as e:
+            return error_json(e), 404
+        return None, 204

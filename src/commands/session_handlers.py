@@ -7,7 +7,7 @@ from commands.room_handlers import generate_room_list
 
 
 def print_session(session: Session):
-    show = svc.find_shows_id(session.showId)
+    show = svc.find_show_id(session.showId)
     print(f" * {session.dateTime} (event: {session.eventId}; ",
           f"show: {show.enTitle if show else 'NOT FOUND'}) -- {session.id}")
     for r in session.rooms:
