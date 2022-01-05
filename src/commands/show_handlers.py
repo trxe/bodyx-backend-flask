@@ -1,6 +1,8 @@
+import mongoengine
+
 from data.show import Show
 import services.data_service as svc
-import mongoengine
+from commands.room_handlers import generate_room_list
 
 
 def print_show(show: Show):
@@ -12,8 +14,9 @@ def create_show():
     cn_title = input("enter chinese title: ")
     duration_mins = int(input("enter duration in minutes: "))
     print("enter default rooms: ")
+    rooms = generate_room_list()
     try:
-        show = svc.create_show(en_title, cn_title, duration_mins, default_rooms=[])
+        show = svc.create_show(en_title, cn_title, duration_mins, default_rooms=rooms)
         print("show created:", str(show.id))
     except mongoengine.errors.NotUniqueError:
         print("Error: show with identical english title found")
@@ -35,3 +38,21 @@ def list_shows():
     print("shows: ")
     for show in shows:
         print_show(show)
+
+
+def delete_show():
+    delete_id = input("enter show id to delete: ")
+    try:
+        svc.delete_show(delete_id)
+    except Exception as e:
+        print("[ERROR] show not found:", e)
+
+
+def find_show_id():
+    show_id = input("enter show id to search: ")
+    try:
+        show_found = svc.find_shows_id(show_id)
+        print("shows:")
+        print_show(show_found)
+    except Exception as e:
+        print("[ERROR] show not found:", e)

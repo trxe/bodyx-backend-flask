@@ -9,7 +9,8 @@ def print_cmds():
     print("Welcome to BODYX services")
     print("[show] [session] -c: create show/session")
     print("[show] [session] -r: find show/session")
-    # print("[show] [session] -u: update show/session")
+    print("session -u --room -c: create room for this session")
+    print("session -u --room -u: update room for this session")
     # print("[show] [session] -d: delete show/session")
     print("[show] [session] -l: list shows/session")
     print("help: shows this page")
@@ -30,7 +31,12 @@ def parse_cmds(raw: str):
         if cmd[1] == "c":
             show_cmd.create_show()
         elif cmd[1] == "r":
-            show_cmd.find_show()
+            if cmd[2] == "-id":
+                show_cmd.find_show_id()
+            elif cmd[2] == "-title":
+                show_cmd.find_show()
+        elif cmd[1] == "d":
+            show_cmd.delete_show()
         elif cmd[1] == "l":
             show_cmd.list_shows()
     elif cmd[0] == "help":
@@ -40,6 +46,11 @@ def parse_cmds(raw: str):
             session_cmd.create_session()
         elif cmd[1] == "r":
             session_cmd.list_sessions_by_show()
+        elif cmd[1] == "u":
+            if cmd[2] == "-room" and cmd[3] == "c":
+                session_cmd.create_session_room()
+            elif cmd[2] == "-room" and cmd[3] == "u":
+                print("update room")
         elif cmd[1] == "l":
             session_cmd.list_sessions()
     else:
