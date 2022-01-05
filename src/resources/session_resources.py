@@ -30,7 +30,7 @@ class Session(Resource):
         except NotFoundError as e:
             return error_json(e), 404
         except InvalidIdError as e:
-            return error_json(e), 403
+            return error_json(e), 400
 
     @staticmethod
     def post():
@@ -49,7 +49,7 @@ class Session(Resource):
         except NotFoundError as e:
             return error_json(e), 404
         except InvalidIdError as e:
-            return error_json(e), 403
+            return error_json(e), 400
         try:
             args = request.json
             date_time, event_id, show_id, is_playing, rooms = retrieve_session_args(args)
@@ -68,5 +68,5 @@ class Session(Resource):
         except NotFoundError as e:
             return error_json(e), 404
         except InvalidIdError as e:
-            return error_json(e), 403
+            return error_json(e), 400
         return None, 204

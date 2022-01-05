@@ -24,7 +24,7 @@ class Show(Resource):
             except NotFoundError as e:
                 return error_json(e), 404
             except InvalidIdError as e:
-                return error_json(e), 403
+                return error_json(e), 400
         return success_json("Found shows:", list(map(svc.get_show_dict, svc.list_shows())))
 
     @staticmethod
@@ -44,7 +44,7 @@ class Show(Resource):
         except NotFoundError as e:
             return error_json(e), 404
         except InvalidIdError as e:
-            return error_json(e), 403
+            return error_json(e), 400
         args = request.json
         en_title, cn_title, duration_mins, default_rooms = retrieve_show_args(args)
         try:

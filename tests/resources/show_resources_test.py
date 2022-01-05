@@ -55,7 +55,7 @@ class TestShowResources(unittest.TestCase):
         self.assertEqual(404, response.status_code)
         response = requests.put(TestShowResources.root + "shows/" + "200",
                                 shows.show_a_edit_en_title, headers=TestShowResources.json_header)
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_delete(self) -> None:
         TestShowResources.test_valid_post(self)

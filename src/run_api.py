@@ -11,7 +11,7 @@ from resources.session_resources import Session
 app = Flask(__name__)
 api = Api(app)
 load_dotenv()
-mongo_setup.mock_init()
+mongo_setup.global_init()
 
 
 @app.route("/")
