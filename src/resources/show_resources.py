@@ -3,7 +3,8 @@ from flask_restful import Resource
 
 import services.data_service as svc
 from resources.response import error_json, success_json
-from exceptions.exceptions import NotFoundError, InvalidIdError
+from resources.user_resources import token_required
+from exceptions.exceptions import NotFoundError, InvalidIdError, NoAccessError
 
 
 def retrieve_show_args(args) -> tuple:
@@ -16,11 +17,15 @@ def retrieve_show_args(args) -> tuple:
 
 class Show(Resource):
     @staticmethod
-    def get(show_id=None):
+    @token_required
+    def get(current_user, show_id=None):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         if show_id is not None:
             try:
-                shows = svc.list_sessions_by_show(show_id)
-                return success_json("Found show", list(map(svc.get_show_dict, shows)))
+                show = svc.find_show_id(show_id)
+                return success_json("Found show", svc.get_show_dict(show))
             except NotFoundError as e:
                 return error_json(e), 404
             except InvalidIdError as e:
@@ -28,7 +33,11 @@ class Show(Resource):
         return success_json("Found shows:", list(map(svc.get_show_dict, svc.list_shows())))
 
     @staticmethod
-    def post():
+    @token_required
+    def post(current_user):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         try:
             args = request.json
             en_title, cn_title, duration_mins, default_rooms = retrieve_show_args(args)
@@ -38,7 +47,11 @@ class Show(Resource):
             return error_json(e), 400
 
     @staticmethod
-    def put(show_id):
+    @token_required
+    def put(current_user, show_id):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         try:
             show = svc.find_show_id(show_id)
         except NotFoundError as e:
@@ -54,11 +67,16 @@ class Show(Resource):
         return success_json(f"Edited show {show.id}", svc.get_show_dict(show)), 201
 
     @staticmethod
-    def delete(show_id=None):
-        if not show_id:
-            svc.reset_shows()
+    @token_required
+    def delete(current_user, show_id=None):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         try:
-            svc.delete_show(show_id)
+            if not show_id:
+                svc.reset_shows()
+            else:
+                svc.delete_show(show_id)
         except NotFoundError as e:
             return error_json(e), 404
         return None, 204

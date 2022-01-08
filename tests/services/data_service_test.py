@@ -7,7 +7,6 @@ from data.show import Show
 from data.session import Session
 
 
-# TODO: test API
 class TestDataService(unittest.TestCase):
     @classmethod
     def setUp(cls) -> None:

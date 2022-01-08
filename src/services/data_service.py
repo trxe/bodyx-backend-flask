@@ -29,6 +29,7 @@ def create_show(en_title: str, cn_title: str, duration_mins: int, default_rooms:
         room.isUnlocked = rawRoom.get("isUnlocked")
         show.defaultRooms.append(room)
 
+    print(show.to_json())
     show.save()
     return show
 

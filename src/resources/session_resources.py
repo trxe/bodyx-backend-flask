@@ -3,7 +3,8 @@ from flask_restful import Resource, inputs
 
 import services.data_service as svc
 from resources.response import error_json, success_json
-from exceptions.exceptions import NotFoundError, InvalidIdError
+from resources.user_resources import token_required
+from exceptions.exceptions import NotFoundError, InvalidIdError, NoAccessError
 
 
 def retrieve_session_args(args) -> tuple:
@@ -17,14 +18,19 @@ def retrieve_session_args(args) -> tuple:
 
 class Session(Resource):
     @staticmethod
-    def get(session_id=None):
+    @token_required
+    def get(current_user, session_id=None):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         try:
             if session_id:
                 session = svc.find_session_id(session_id)
                 return success_json(f"found session with id {session_id}", svc.get_session_dict(session))
             elif request.args and "show_id" in request.args:
-                sessions = svc.list_sessions_by_show(request.args.get("show_id"))
-                return success_json("Found sessions:", list(map(svc.get_session_dict, sessions)))
+                show_id = request.args.get("show_id")
+                sessions = svc.list_sessions_by_show(show_id)
+                return success_json(f"Found sessions of show {show_id}:", list(map(svc.get_session_dict, sessions)))
             else:
                 return success_json("Found sessions:", list(map(svc.get_session_dict, svc.list_sessions())))
         except NotFoundError as e:
@@ -33,7 +39,11 @@ class Session(Resource):
             return error_json(e), 400
 
     @staticmethod
-    def post():
+    @token_required
+    def post(current_user):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         try:
             args = request.json
             date_time, event_id, show_id, is_playing, rooms = retrieve_session_args(args)
@@ -43,7 +53,11 @@ class Session(Resource):
             return error_json(e), 400
 
     @staticmethod
-    def put(session_id):
+    @token_required
+    def put(current_user, session_id):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         try:
             session = svc.find_session_id(session_id)
         except NotFoundError as e:
@@ -60,7 +74,11 @@ class Session(Resource):
         pass
 
     @staticmethod
-    def delete(session_id=None):
+    @token_required
+    def delete(current_user, session_id=None):
+        if not current_user.isAdmin:
+            return error_json(NoAccessError()), 401
+
         if not session_id:
             svc.reset_sessions()
         try:
