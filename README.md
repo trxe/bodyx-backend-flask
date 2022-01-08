@@ -134,7 +134,7 @@ All responses should have the form
 - `404 Not found`
 - `400 Bad request` on invalid input or id
 
-```
+```json
 {
 	"isPlaying": True,
 	"rooms": [
