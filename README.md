@@ -1,8 +1,31 @@
 # BODYX Service
 
+## Authentication
+
+Send a request with basic auth.
+
+```json
+{
+    "username": "username",
+    "password": "password"
+}
+```
+
+To make any API request, include the token received from a successful login as the value of the key `x-access-token` in the header of the request.
+
+```json
+{
+    "data": {
+        "token": "sampleToken$eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.ey..."
+    },
+    "error": "",
+    "message": "Login success"
+}
+```
+
 ## Usage
 
-All responses should have the form 
+Headers should include `content-type` and`x-access-token`. All responses should have the form:
 
 ```json
 {
@@ -11,6 +34,10 @@ All responses should have the form
     "error": "message on error",
 }
 ```
+
+## Viewer and Admin API
+
+## Admin only API
 
 ### List all shows
 

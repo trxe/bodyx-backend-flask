@@ -6,6 +6,8 @@ import markdown
 from flask import Flask, request
 from flask_restful import Api
 from dotenv import load_dotenv
+from pathlib import Path
+from flask_cors import CORS
 
 import data.mongo_setup as mongo_setup
 from exceptions.exceptions import NotFoundError, AuthenticationError
@@ -17,13 +19,14 @@ import services.login_service as login_svc
 app = Flask(__name__)
 api = Api(app)
 load_dotenv()
+CORS(app)
 mongo_setup.global_init()
 secret_key = os.getenv("SECRET_KEY")
 
 
 @app.route("/")
 def index():
-    with open(os.getcwd() + "/README.md", "r") as markdown_file:
+    with open(Path(os.getcwd()) / "README.md", "r") as markdown_file:
         content = markdown_file.read()
         return markdown.markdown(content)
 
