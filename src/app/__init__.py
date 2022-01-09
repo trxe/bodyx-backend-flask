@@ -49,9 +49,9 @@ def login():
         if check_password_hash(auth.password, user.password):
             token = jwt.encode({
                 "publicId": str(user.publicId),
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=480)
             }, secret_key)
-            return success_json("Login success", {"token": token})
+            return success_json("Login success", {"token": token, "isAdmin": user.isAdmin})
         return auth_fail_msg()
     except NotFoundError:
         return auth_fail_msg()
