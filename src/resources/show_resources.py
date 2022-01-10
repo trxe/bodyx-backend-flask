@@ -75,7 +75,11 @@ class Show(Resource):
         try:
             if not show_id:
                 svc.reset_shows()
+                svc.reset_sessions()
             else:
+                sessions = svc.list_sessions_by_show(show_id)
+                for s in sessions:
+                    svc.delete_session(s.id)
                 svc.delete_show(show_id)
         except NotFoundError as e:
             return error_json(e), 404

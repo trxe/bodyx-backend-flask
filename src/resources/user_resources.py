@@ -61,7 +61,7 @@ class User(Resource):
         try:
             args = request.json
             username, password, is_admin, session_id = retrieve_user_args(args)
-            user = login_svc.create_user(username, password, is_admin, session_id)
+            user = login_svc.create_user(username, password, is_admin)
             return success_json(f"Created new user {user.id}", login_svc.get_user_dict(user)), 201
         except Exception as e:
             return error_json(e), 400

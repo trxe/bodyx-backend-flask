@@ -73,7 +73,7 @@ def get_show_dict(show: Show) -> dict:
 
 def get_session_dict(session: Session) -> dict:
     return {
-        "dateTime": str(session.dateTime),
+        "dateTime": session.dateTime.replace(tzinfo=datetime.timezone.utc).isoformat(),
         "eventId": session.eventId,
         "isPlaying": session.isPlaying,
         "showId": str(session.showId),
