@@ -17,17 +17,3 @@ class TestUserResources(unittest.TestCase):
         response = requests.get(TestUserResources.root + "login", auth=auth_details)
         token = response.json().get("data").get("token")
         return user_admin, token
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        print("setting up")
-
-    def test_login(self):
-        user_admin = json.loads(users.admin)
-        response = requests.get(TestUserResources.root + "login", auth=tuple(user_admin.values()))
-        self.assertEqual(200, response.status_code)
-        token = response.json().get("data").get("token")
-        self.assertIsNotNone(token)
-        user_admin["isAdmin"] = response.json().get("data").get("isAdmin")
-        print(user_admin)
-        return user_admin, token

@@ -1,6 +1,7 @@
 import json
 import unittest
 import requests
+import datetime
 import dateutil.parser
 
 import sample_data.show_sample as shows
@@ -34,7 +35,7 @@ class TestSessionResources(unittest.TestCase):
         new_session_rooms = new_session.pop("rooms")
         new_session.pop("id")
         expected_session = json.loads(sessions.session_a(TestSessionResources.show_id))
-        expected_dt = dateutil.parser.parse(expected_session.pop("dateTime"))
+        expected_dt = dateutil.parser.parse(expected_session.pop("dateTime")).replace(tzinfo=datetime.timezone.utc)
         new_dt = dateutil.parser.parse(new_session.pop("dateTime"))
         self.assertEqual(False, new_session.pop("isPlaying"))
         self.assertEqual(expected_dt, new_dt)
