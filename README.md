@@ -6,8 +6,8 @@ Send a request with basic auth.
 
 ```json
 {
-    "username": "username",
-    "password": "password"
+  "username": "username",
+  "password": "password"
 }
 ```
 
@@ -15,11 +15,12 @@ To make any API request, include the token received from a successful login as t
 
 ```json
 {
-    "data": {
-        "token": "sampleToken$eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.ey..."
-    },
-    "error": "",
-    "message": "Login success"
+  "data": {
+    "token": "sampleToken$eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.ey..."
+    "isAdmin": true
+  },
+  "error": "",
+  "message": "Login success"
 }
 ```
 
@@ -29,9 +30,9 @@ Headers should include `content-type` and`x-access-token`. All responses should 
 
 ```json
 {
-	"data": "content of response",
-	"msg": "message on success",
-    "error": "message on error",
+  "data": "content of response",
+  "msg": "message on success",
+  "error": "message on error"
 }
 ```
 
@@ -68,10 +69,10 @@ Headers should include `content-type` and`x-access-token`. All responses should 
 
 ```json
 {
-	"id": "61d5ac4958b919489f458d9f",
-	"enTitle": "English",
-	"cnTitle": "中文",
-	"durationMins": 120,
+  "id": "61d5ac4958b919489f458d9f",
+  "enTitle": "English",
+  "cnTitle": "中文",
+  "durationMins": 120
 }
 ```
 
@@ -137,9 +138,9 @@ Headers should include `content-type` and`x-access-token`. All responses should 
 
 ```json
 {
-	"dateTime": "2012-01-01T23:30:00+02:00",
-    "eventId": "first",
-    "showId": "61d5ac4958b919489f458d9f",
+  "dateTime": "2012-01-01T23:30:00+02:00",
+  "eventId": "first",
+  "showId": "61d5ac4958b919489f458d9f"
 }
 ```
 
@@ -163,19 +164,19 @@ Headers should include `content-type` and`x-access-token`. All responses should 
 
 ```json
 {
-	"isPlaying": True,
-	"rooms": [
-		{
-			"title": "Round Table",
-            "url": "new_url",
-            "isUnlocked": True,
-		},
-		{
-			"title": "Cashier Counter",
-            "url": "another_new_url",
-            "isUnlocked": False,
-		}
-	]
+  "isPlaying": true,
+  "rooms": [
+    {
+      "title": "Round Table",
+      "url": "new_url",
+      "isUnlocked": true
+    },
+    {
+      "title": "Cashier Counter",
+      "url": "another_new_url",
+      "isUnlocked": false
+    }
+  ]
 }	
 ```
 
