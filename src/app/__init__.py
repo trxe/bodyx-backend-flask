@@ -21,7 +21,7 @@ app = Flask(__name__)
 api = Api(app)
 load_dotenv()
 CORS(app)
-mongo_setup.mock_init()
+mongo_setup.global_init()
 secret_key = os.getenv("SECRET_KEY")
 
 
@@ -37,13 +37,19 @@ def login():
     def check_password_hash(pw, hashed):
         return bcrypt.checkpw(pw.encode("utf-8"), hashed)
 
-    def auth_fail_msg():
-        return error_json(AuthenticationError()), 401
+    def auth_fail_msg(msg=None):
+        return error_json(AuthenticationError(msg)), 401
 
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
         return auth_fail_msg()
+    if not auth:
+        return auth_fail_msg("No username and password")
+    elif not auth.username:
+        return auth_fail_msg("No username")
+    elif not auth.password:
+        return auth_fail_msg("No password")
 
     try:
         user = login_svc.find_user(username=auth.username)
@@ -53,9 +59,9 @@ def login():
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=480)
             }, secret_key)
             return success_json("Login success", {"token": token, "isAdmin": user.isAdmin})
-        return auth_fail_msg()
+        return auth_fail_msg("Wrong password")
     except NotFoundError:
-        return auth_fail_msg()
+        return auth_fail_msg("No user found")
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")

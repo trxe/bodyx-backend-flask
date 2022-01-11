@@ -222,6 +222,11 @@ def update_running_info(show_id: str, session_id: str, is_house_open: bool) -> R
 
 
 def reset_running_info():
+    info = RunningInfo.objects().first()
+    if info and info.sessionId is not None:
+        prev_session = find_session_id(info.sessionId)
+        prev_session.isPlaying = False
+        prev_session.save()
     RunningInfo.drop_collection()
     info = RunningInfo()
     info.save()

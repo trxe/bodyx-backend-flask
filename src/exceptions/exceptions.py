@@ -21,8 +21,9 @@ class InvalidIdError(Exception):
 
 
 class AuthenticationError(Exception):
-    def __init__(self):
-        super(AuthenticationError, self).__init__("Could not verify username or password")
+    def __init__(self, msg=None):
+        super(AuthenticationError, self).__init__(
+            "Could not verify username or password" if not msg else msg)
 
 
 class InvalidTokenError(Exception):
