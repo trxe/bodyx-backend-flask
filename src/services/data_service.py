@@ -6,6 +6,7 @@ import datetime
 from data.show import Show
 from data.session import Session
 from data.room import Room
+from data.running_info import RunningInfo
 from exceptions.exceptions import NotFoundError, InvalidIdError
 
 
@@ -82,6 +83,16 @@ def get_session_dict(session: Session) -> dict:
     }
 
 
+def get_running_info_dict(running_info: RunningInfo) -> dict:
+    return {
+        "show":
+            get_show_dict(find_show_id(running_info.showId)) if running_info.showId is not None else None,
+        "session":
+            get_session_dict(find_session_id(running_info.sessionId)) if running_info.sessionId is not None else None,
+        "isHouseOpen": running_info.isHouseOpen
+    }
+
+
 def list_shows() -> list:
     return list(Show.objects())
 
@@ -94,7 +105,7 @@ def delete_show(show_id: str) -> None:
 def find_show_id(search: str) -> Show:
     try:
         query = list(Show.objects(id=ObjectId(search)))
-    except bson.errors.InvalidId as e:
+    except bson.errors.InvalidId:
         raise InvalidIdError(invalid_id=search)
     if len(query) == 0:
         raise NotFoundError(f"Show with id {search} not found")
@@ -134,7 +145,7 @@ def create_session_rooms(session: Session, rooms: list[dict]) -> Session:
 
 
 def update_session(session: Session, date_time=None, event_id=None, is_playing=None,
-                   show_id=None, updated_rooms=None) -> None:
+                   show_id=None, updated_rooms=None) -> Session:
     if date_time is not None:
         session.dateTime = date_time
     if event_id is not None:
@@ -167,7 +178,7 @@ def list_sessions_by_show(search: str) -> list:
 def find_session_id(search: str) -> Session:
     try:
         query = list(Session.objects(id=ObjectId(search)))
-    except bson.errors.InvalidId as e:
+    except bson.errors.InvalidId:
         raise InvalidIdError(invalid_id=search)
     if len(query) == 0:
         raise NotFoundError(f"Show with id {search} not found")
@@ -177,3 +188,40 @@ def find_session_id(search: str) -> Session:
 def delete_session(session_id):
     session = find_session_id(session_id)
     session.delete()
+
+
+def get_running_info() -> RunningInfo:
+    info = RunningInfo.objects().first()
+    if not info:
+        info = RunningInfo()
+        info.save()
+    return info
+
+
+def update_running_info(show_id: str, session_id: str, is_house_open: bool) -> RunningInfo:
+    info = RunningInfo.objects().first()
+    if not info:
+        info = RunningInfo()
+    if info.sessionId is not None:
+        prev_session = find_session_id(info.sessionId)
+        prev_session.isPlaying = False
+        prev_session.save()
+
+    if show_id is not None:
+        info.showId = show_id
+    if session_id is not None:
+        info.sessionId = session_id
+        session = find_session_id(session_id)
+        session.isPlaying = True
+        session.save()
+    if is_house_open is not None:
+        info.isHouseOpen = is_house_open
+
+    info.save()
+    return info
+
+
+def reset_running_info():
+    RunningInfo.drop_collection()
+    info = RunningInfo()
+    info.save()

@@ -14,13 +14,14 @@ from exceptions.exceptions import NotFoundError, AuthenticationError
 from resources.show_resources import Show
 from resources.session_resources import Session, success_json, error_json
 from resources.user_resources import User
+from resources.running_info_resources import RunningInfo
 import services.login_service as login_svc
 
 app = Flask(__name__)
 api = Api(app)
 load_dotenv()
 CORS(app)
-mongo_setup.global_init()
+mongo_setup.mock_init()
 secret_key = os.getenv("SECRET_KEY")
 
 
@@ -60,6 +61,7 @@ def login():
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")
 api.add_resource(Session, "/sessions", "/sessions/<string:session_id>")
 api.add_resource(User, "/users", "/users/<string:user_id>")
+api.add_resource(RunningInfo, "/runningInfo")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -152,3 +152,10 @@ class TestDataService(unittest.TestCase):
         sessions_b = svc.list_sessions_by_show(show_b_id)
         self.assertListEqual(sessions_a, [session_one, session_three])
         self.assertListEqual(sessions_b, [session_two])
+
+    def test_post_running_info(self):
+        print("===========")
+        print("List Session by show")
+        show_a = svc.create_show("showA", "cnA", 100, [])
+        time = dateutil.parser.parse("2022-01-03")
+        session_a = svc.create_session(time, "eventOne", str(show_a.id))
