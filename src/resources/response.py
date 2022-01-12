@@ -9,7 +9,7 @@ class Response:
 
 
 def error_json(e: Exception) -> str:
-    return Response(error="[ERROR] " + str(e)).to_json()
+    return Response(error=str(e)).to_json()
 
 
 def success_json(msg: str, data) -> str:
