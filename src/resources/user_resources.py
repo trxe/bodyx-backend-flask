@@ -27,7 +27,7 @@ def token_required(f):
             return error_json(InvalidTokenError(missing=True)), 401
         try:
             token = request.headers.get("x-access-token")
-            print("User token:", str(token))
+            print("User token:", type(token), type(secret_key))
             data = jwt.decode(token, secret_key, algorithms=["HS256"])
             current_user = login_svc.find_user(user_id=data["publicId"])
         except NotFoundError:

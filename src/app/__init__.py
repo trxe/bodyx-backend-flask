@@ -3,13 +3,12 @@ import os.path
 import bcrypt
 import jwt
 import markdown
-from flask import Flask, Response, request
+from flask import Flask, request, Response
 from flask_restful import Api
 from dotenv import load_dotenv
 from pathlib import Path
 from flask_cors import CORS
-import json
-import time
+
 
 import data.mongo_setup as mongo_setup
 from exceptions.exceptions import NotFoundError, AuthenticationError
@@ -19,6 +18,7 @@ from resources.user_resources import User
 from resources.running_info_resources import RunningInfo
 import services.login_service as login_svc
 import services.data_service as svc
+from commands.message_announcer import MessageAnnouncer
 
 app = Flask(__name__)
 api = Api(app)
@@ -26,6 +26,8 @@ load_dotenv()
 CORS(app)
 mongo_setup.global_init()
 secret_key = os.getenv("SECRET_KEY")
+
+announcer = MessageAnnouncer()
 
 
 @app.route("/")
@@ -67,14 +69,29 @@ def login():
         return auth_fail_msg("Username not found")
 
 
-@app.route("/listen")
+def format_sse(data: str, event=None) -> str:
+    msg = f'data: {data}\n\n'
+    if event is not None:
+        msg = f'event: {event}\n{msg}'
+    return msg
+
+
+@app.route("/ping")
+def ping():
+    msg = format_sse(data='pong')
+    announcer.announce(msg=msg)
+    return {}, 200
+
+
+@app.route('/listen', methods=['GET'])
 def listen():
-    def respond_to_viewer():
+    def stream():
+        messages = announcer.listen()  # returns a queue.Queue
         while True:
-            running_info = svc.get_running_info_dict(svc.get_running_info())
-            yield json.dumps(running_info)
-            time.sleep(5.0)
-    return Response(respond_to_viewer(), mimetype='text/event-stream')
+            msg = messages.get()  # blocks until a new message arrives
+            yield msg
+
+    return Response(stream(), mimetype='text/event-stream')
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")
