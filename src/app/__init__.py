@@ -3,11 +3,13 @@ import os.path
 import bcrypt
 import jwt
 import markdown
-from flask import Flask, request
+from flask import Flask, Response, request
 from flask_restful import Api
 from dotenv import load_dotenv
 from pathlib import Path
 from flask_cors import CORS
+import json
+import time
 
 import data.mongo_setup as mongo_setup
 from exceptions.exceptions import NotFoundError, AuthenticationError
@@ -16,6 +18,7 @@ from resources.session_resources import Session, success_json, error_json
 from resources.user_resources import User
 from resources.running_info_resources import RunningInfo
 import services.login_service as login_svc
+import services.data_service as svc
 
 app = Flask(__name__)
 api = Api(app)
@@ -62,6 +65,16 @@ def login():
         return auth_fail_msg("Wrong password")
     except NotFoundError:
         return auth_fail_msg("Username not found")
+
+
+@app.route("/listen")
+def listen():
+    def respond_to_viewer():
+        while True:
+            running_info = svc.get_running_info_dict(svc.get_running_info())
+            yield json.dumps(running_info)
+            time.sleep(5.0)
+    return Response(respond_to_viewer(), mimetype='text/event-stream')
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")
