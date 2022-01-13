@@ -61,7 +61,7 @@ def login():
             return success_json("Login success", {"token": token, "isAdmin": user.isAdmin})
         return auth_fail_msg("Wrong password")
     except NotFoundError:
-        return auth_fail_msg("No user found")
+        return auth_fail_msg("Username not found")
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")
