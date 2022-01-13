@@ -9,9 +9,10 @@ def hash_password(password: str) -> bytes:
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
 
-def create_user(username: str, password: str, is_admin: bool) -> User:
+def create_user(email: str, username: str, password: str, is_admin: bool) -> User:
     hashed_password = hash_password(password)
     user = User()
+    user.email = email
     user.publicId = uuid.uuid4()
     user.username = username
     user.password = hashed_password
@@ -23,6 +24,7 @@ def create_user(username: str, password: str, is_admin: bool) -> User:
 
 def get_user_dict(user: User) -> dict:
     return {
+        "email": user.email,
         "username": user.username,
         "publicId": str(user.publicId),
         "isAdmin": user.isAdmin,
@@ -43,7 +45,7 @@ def find_user(user_id=None, username=None) -> User:
     return query[0]
 
 
-def update_user(user: User, username=None, password=None, is_admin=None) -> None:
+def update_user(user: User, username=None, password=None, is_admin=None) -> User:
     if username is not None:
         user.username = username
     if password is not None:

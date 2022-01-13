@@ -13,11 +13,11 @@ secret_key = os.getenv("SECRET_KEY")
 
 
 def retrieve_user_args(args) -> tuple:
+    email = args.get("email")
     username = args.get("username")
     password = args.get("password")
     is_admin = args.get("isAdmin")
-    session_id = args.get("sessionId")
-    return username, password, is_admin, session_id
+    return email, username, password, is_admin
 
 
 def token_required(f):
@@ -60,8 +60,8 @@ class User(Resource):
     def post():
         try:
             args = request.json
-            username, password, is_admin, session_id = retrieve_user_args(args)
-            user = login_svc.create_user(username, password, is_admin)
+            email, username, password, is_admin = retrieve_user_args(args)
+            user = login_svc.create_user(email, username, password, is_admin)
             return success_json(f"Created new user {user.id}", login_svc.get_user_dict(user)), 201
         except Exception as e:
             return error_json(e), 400
@@ -77,7 +77,7 @@ class User(Resource):
         except NotFoundError as e:
             return error_json(e), 404
         args = request.json
-        username, password, is_admin = retrieve_user_args(args)
+        email, username, password, is_admin = retrieve_user_args(args)
         try:
             login_svc.update_user(user, username, password, is_admin)
         except Exception as e:

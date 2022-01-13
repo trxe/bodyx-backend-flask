@@ -2,6 +2,7 @@ import mongoengine
 
 
 class User(mongoengine.Document):
+    email = mongoengine.StringField(required=True)
     username = mongoengine.StringField(required=True)
     publicId = mongoengine.UUIDField(required=True)
     password = mongoengine.BinaryField(required=True)

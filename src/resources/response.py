@@ -8,9 +8,9 @@ class Response:
         return self.__dict__
 
 
-def error_json(e: Exception) -> str:
+def error_json(e: Exception) -> dict:
     return Response(error=str(e)).to_json()
 
 
-def success_json(msg: str, data) -> str:
+def success_json(msg: str, data) -> dict:
     return Response(msg=msg, data=data).to_json()
