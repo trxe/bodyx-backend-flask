@@ -14,4 +14,6 @@ def stream():
         yield msg
 ```
 
+Enable authentication with the sse access
+
 ## Organizing routes in `__init__.py`
