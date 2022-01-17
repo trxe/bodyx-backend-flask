@@ -1,5 +1,8 @@
 import datetime
+import json
 import os.path
+import time
+
 import bcrypt
 import jwt
 import markdown
@@ -69,29 +72,22 @@ def login():
         return auth_fail_msg("Username not found")
 
 
+@app.route("/listen")
+def listen():
+    def respond_to_client():
+        while True:
+            print("sending running info...")
+            data = svc.get_running_info_dict(svc.get_running_info())
+            yield format_sse(json.dumps(data), event="runningInfo")
+            time.sleep(5.0)
+    return Response(respond_to_client(), mimetype="text/event-stream")
+
+
 def format_sse(data: str, event=None) -> str:
     msg = f'data: {data}\n\n'
     if event is not None:
-        msg = f'event: {event}\n{msg}'
+        msg = f'event: {event}\ndata: {data}\n\n'
     return msg
-
-
-@app.route("/ping")
-def ping():
-    msg = format_sse(data='pong')
-    announcer.announce(msg=msg)
-    return {}, 200
-
-
-@app.route('/listen', methods=['GET'])
-def listen():
-    def stream():
-        messages = announcer.listen()  # returns a queue.Queue
-        while True:
-            msg = messages.get()  # blocks until a new message arrives
-            yield msg
-
-    return Response(stream(), mimetype='text/event-stream')
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")
