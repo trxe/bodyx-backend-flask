@@ -25,6 +25,8 @@ class ServerSentEvents(Resource):
         except NotFoundError or InvalidTokenError:
             return error_json(InvalidTokenError()), 401
 
+        print("check succeeded")
+
         def respond_to_client():
             msgs = announcer.listen()
             while True:
@@ -33,4 +35,5 @@ class ServerSentEvents(Resource):
                 print("sending running info...", msg)
                 data = svc.get_running_info_dict(svc.get_running_info())
                 yield format_sse(json.dumps(data), event="runningInfo")
+        print("response set up")
         return Response(respond_to_client(), mimetype="text/event-stream")
