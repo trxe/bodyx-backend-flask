@@ -19,9 +19,10 @@ from resources.show_resources import Show
 from resources.session_resources import Session, success_json, error_json
 from resources.user_resources import User
 from resources.running_info_resources import RunningInfo
+from resources.sse_resources import ServerSentEvents
 import services.login_service as login_svc
 import services.data_service as svc
-from commands.message_announcer import MessageAnnouncer
+from resources.message_announcer import announcer
 
 app = Flask(__name__)
 api = Api(app)
@@ -29,8 +30,6 @@ load_dotenv()
 CORS(app)
 mongo_setup.global_init()
 secret_key = os.getenv("SECRET_KEY")
-
-announcer = MessageAnnouncer()
 
 
 @app.route("/")
@@ -72,14 +71,17 @@ def login():
         return auth_fail_msg("Username not found")
 
 
+'''
 @app.route("/listen")
 def listen():
     def respond_to_client():
+        msgs = announcer.listen()
         while True:
-            print("sending running info...")
+            # blocks until new message arrives
+            msg = msgs.get()
+            print("sending running info...", msg)
             data = svc.get_running_info_dict(svc.get_running_info())
             yield format_sse(json.dumps(data), event="runningInfo")
-            time.sleep(5.0)
     return Response(respond_to_client(), mimetype="text/event-stream")
 
 
@@ -88,12 +90,14 @@ def format_sse(data: str, event=None) -> str:
     if event is not None:
         msg = f'event: {event}\ndata: {data}\n\n'
     return msg
+'''
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")
 api.add_resource(Session, "/sessions", "/sessions/<string:session_id>")
 api.add_resource(User, "/users", "/users/<string:user_id>")
 api.add_resource(RunningInfo, "/runningInfo")
+api.add_resource(ServerSentEvents, "/online/<string:token>")
 
 if __name__ == "__main__":
     app.run(debug=True)

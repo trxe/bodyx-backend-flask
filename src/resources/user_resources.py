@@ -20,6 +20,12 @@ def retrieve_user_args(args) -> tuple:
     return email, username, password, is_admin
 
 
+def user_lookup(token: str):
+    data = jwt.decode(token, secret_key, algorithms=["HS256"])
+    current_user = login_svc.find_user(user_id=data["publicId"])
+    return current_user
+
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -28,8 +34,7 @@ def token_required(f):
         try:
             token = request.headers.get("x-access-token")
             print("User token:", type(token), type(secret_key))
-            data = jwt.decode(token, secret_key, algorithms=["HS256"])
-            current_user = login_svc.find_user(user_id=data["publicId"])
+            current_user = user_lookup(token)
         except NotFoundError:
             return error_json(InvalidTokenError()), 401
         return f(current_user, *args, **kwargs)

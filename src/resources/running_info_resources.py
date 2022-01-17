@@ -5,6 +5,7 @@ import services.data_service as svc
 from resources.response import error_json, success_json
 from resources.user_resources import token_required
 from exceptions.exceptions import NotFoundError, InvalidIdError, NoAccessError
+from resources.message_announcer import announcer
 
 
 def retrieve_running_info_args(args) -> tuple:
@@ -36,6 +37,7 @@ class RunningInfo(Resource):
             args = request.json
             show_id, session_id, is_house_open = retrieve_running_info_args(args)
             running_info = svc.update_running_info(show_id, session_id, is_house_open)
+            announcer.announce("start show success")
             return success_json(f"Now running show {show_id}, session {session_id}",
                                 svc.get_running_info_dict(running_info))
         except NotFoundError as e:
@@ -50,4 +52,5 @@ class RunningInfo(Resource):
             return error_json(NoAccessError()), 401
 
         svc.reset_running_info()
+        announcer.announce("end show success")
         return success_json("Deleted", data=None), 204
