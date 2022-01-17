@@ -21,8 +21,6 @@ from resources.user_resources import User
 from resources.running_info_resources import RunningInfo
 from resources.sse_resources import ServerSentEvents
 import services.login_service as login_svc
-import services.data_service as svc
-from resources.message_announcer import announcer
 
 app = Flask(__name__)
 api = Api(app)

@@ -19,6 +19,7 @@ def format_sse(data: str, event=None) -> str:
 class ServerSentEvents(Resource):
     @staticmethod
     def get(token: str):
+        print("received token", token)
         try:
             user_lookup(token)
         except NotFoundError or InvalidTokenError:
