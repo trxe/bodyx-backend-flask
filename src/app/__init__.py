@@ -22,6 +22,9 @@ from resources.running_info_resources import RunningInfo
 from resources.sse_resources import ServerSentEvents
 import services.login_service as login_svc
 
+from gevent import monkey
+monkey.patch_all()
+
 app = Flask(__name__)
 api = Api(app)
 load_dotenv()
