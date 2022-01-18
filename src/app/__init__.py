@@ -19,7 +19,7 @@ from resources.show_resources import Show
 from resources.session_resources import Session, success_json, error_json
 from resources.user_resources import User
 from resources.running_info_resources import RunningInfo
-from resources.sse_resources import ServerSentEvents
+from resources.sse_resources import ServerSentEvents, format_sse
 import services.login_service as login_svc
 
 from gevent import monkey
@@ -71,6 +71,14 @@ def login():
     except NotFoundError:
         return auth_fail_msg("Username not found")
 
+
+@app.route("/heartbeat")
+def heartbeat():
+    def pacemaker():
+        while True:
+            yield format_sse(json.dumps({}), event="heartbeat")
+            time.sleep(1.0)
+    return Response(pacemaker(), mimetype="text/event-stream")
 
 '''
 @app.route("/listen")
