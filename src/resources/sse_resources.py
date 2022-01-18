@@ -34,6 +34,8 @@ class ServerSentEvents(Resource):
                     yield format_sse(json.dumps(data), event="runningInfo")
 
             print("response set up")
-            return Response(respond_to_client(), mimetype="text/event-stream")
+            response = Response(respond_to_client(), mimetype="text/event-stream")
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            return response
         except NotFoundError or InvalidTokenError:
             return error_json(InvalidTokenError()), 401
