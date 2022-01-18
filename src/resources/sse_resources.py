@@ -33,9 +33,9 @@ class ServerSentEvents(Resource):
                     data = svc.get_running_info_dict(svc.get_running_info())
                     yield format_sse(json.dumps(data), event="runningInfo")
 
-            print("response set up")
             response = Response(respond_to_client(), mimetype="text/event-stream")
             response.headers["Access-Control-Allow-Origin"] = "*"
+            print("response set up")
             return response
         except NotFoundError or InvalidTokenError:
             return error_json(InvalidTokenError()), 401
