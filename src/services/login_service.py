@@ -57,6 +57,11 @@ def update_user(user: User, username=None, password=None, is_admin=None) -> User
     return user
 
 
+def set_login_user(user: User, is_logged_in: bool) -> None:
+    user.isLoggedIn = is_logged_in
+    user.save()
+
+
 def reset_users() -> None:
     User.drop_collection()
 

@@ -61,15 +61,30 @@ def login():
 
     try:
         user = login_svc.find_user(username=auth.username)
+        if user.isLoggedIn:
+            return auth_fail_msg(f"{user.username} is already logged in on another device/tab." +
+                                 "Contact your administrator if you think this is a mistake.")
         if check_password_hash(auth.password, user.password):
             token = jwt.encode({
                 "publicId": str(user.publicId),
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=480)
             }, secret_key)
+            login_svc.set_login_user(user, is_logged_in=True)
             return success_json("Login success", {"token": token, "isAdmin": user.isAdmin})
         return auth_fail_msg("Wrong password")
     except NotFoundError:
         return auth_fail_msg("Username not found")
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    try:
+        user_info = request.get_json()
+        user = login_svc.find_user(username=user_info.get("username"))
+        login_svc.set_login_user(user, False)
+        return success_json("Logout success", {})
+    except NotFoundError:
+        return error_json(Exception("Username not found"))
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")

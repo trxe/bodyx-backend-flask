@@ -23,6 +23,8 @@ class ServerSentEvents(Resource):
     def get(token: str):
         print("received token", token)
         try:
+            if not token or token == "null":
+                return Response(None)
             user_lookup(token)
             print("check succeeded")
 
