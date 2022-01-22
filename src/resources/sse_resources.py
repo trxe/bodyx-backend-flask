@@ -7,6 +7,7 @@ from resources.user_resources import user_lookup
 from resources.response import error_json
 from exceptions.exceptions import NotFoundError, InvalidTokenError
 import services.data_service as svc
+from resources.message_announcer import announcer
 
 
 def format_sse(data: str, event=None) -> str:
@@ -21,6 +22,7 @@ def format_sse(data: str, event=None) -> str:
 class ServerSentEvents(Resource):
     @staticmethod
     def get(token: str):
+        msgs = announcer.listen()
         print("received token", token)
         try:
             if not token or token == "null":
@@ -30,10 +32,10 @@ class ServerSentEvents(Resource):
 
             def respond_to_client():
                 while True:
-                    print("sending running info...")
+                    msg = msgs.get()
+                    print("sending running info...", msg)
                     data = svc.get_running_info_dict(svc.get_running_info())
                     yield format_sse(json.dumps(data), event="runningInfo")
-                    time.sleep(5.0)
             response = Response(respond_to_client(), mimetype="text/event-stream")
             response.headers["Access-Control-Allow-Origin"] = "*"
             print("response set up")
