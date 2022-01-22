@@ -24,7 +24,7 @@ class ServerSentEvents(Resource):
         print("received token", token)
         try:
             if not token or token == "null":
-                return Response(None)
+                return None
             user_lookup(token)
             print("check succeeded")
 
