@@ -3,12 +3,14 @@ from flask_restful import Resource
 from functools import wraps
 import jwt
 import os.path
+from dotenv import load_dotenv
 
 import services.login_service as login_svc
 from resources.response import error_json, success_json
 from exceptions.exceptions import NotFoundError, InvalidIdError, InvalidTokenError, NoAccessError
 
 
+load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
 
 
