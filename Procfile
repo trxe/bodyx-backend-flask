@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath ./src wsgi:app --worker-class gevent
+web: gunicorn wsgi:app --worker-class gevent
