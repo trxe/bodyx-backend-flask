@@ -6,7 +6,7 @@ import time
 import bcrypt
 import jwt
 import markdown
-from flask import Flask, request, Response
+from flask import Flask, request
 from flask_restful import Api
 from dotenv import load_dotenv
 from pathlib import Path
@@ -19,7 +19,7 @@ from resources.show_resources import Show
 from resources.session_resources import Session, success_json, error_json
 from resources.user_resources import User
 from resources.running_info_resources import RunningInfo
-from resources.sse_resources import ServerSentEvents, format_sse
+from resources.sse_resources import ServerSentEvents
 import services.login_service as login_svc
 
 app = Flask(__name__)
@@ -67,36 +67,6 @@ def login():
         return auth_fail_msg("Wrong password")
     except NotFoundError:
         return auth_fail_msg("Username not found")
-
-
-@app.route("/heartbeat")
-def heartbeat():
-    def pacemaker():
-        while True:
-            yield format_sse(json.dumps({}), event="heartbeat")
-            time.sleep(1.0)
-    return Response(pacemaker(), mimetype="text/event-stream")
-
-'''
-@app.route("/listen")
-def listen():
-    def respond_to_client():
-        msgs = announcer.listen()
-        while True:
-            # blocks until new message arrives
-            msg = msgs.get()
-            print("sending running info...", msg)
-            data = svc.get_running_info_dict(svc.get_running_info())
-            yield format_sse(json.dumps(data), event="runningInfo")
-    return Response(respond_to_client(), mimetype="text/event-stream")
-
-
-def format_sse(data: str, event=None) -> str:
-    msg = f'data: {data}\n\n'
-    if event is not None:
-        msg = f'event: {event}\ndata: {data}\n\n'
-    return msg
-'''
 
 
 api.add_resource(Show, "/shows", "/shows/<string:show_id>")

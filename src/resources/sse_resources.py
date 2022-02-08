@@ -1,12 +1,12 @@
 from flask import Response
 from flask_restful import Resource
 import json
+import time
 
 from resources.user_resources import user_lookup
 from resources.response import error_json
 from exceptions.exceptions import NotFoundError, InvalidTokenError
 import services.data_service as svc
-from resources.message_announcer import announcer
 
 
 def format_sse(data: str, event=None) -> str:
@@ -16,6 +16,8 @@ def format_sse(data: str, event=None) -> str:
     return msg
 
 
+# Note: Currently just pinging every 5.0s due to heroku.
+# https://devcenter.heroku.com/articles/request-timeout#long-polling-and-streaming-responses
 class ServerSentEvents(Resource):
     @staticmethod
     def get(token: str):
@@ -25,14 +27,11 @@ class ServerSentEvents(Resource):
             print("check succeeded")
 
             def respond_to_client():
-                msgs = announcer.listen()
                 while True:
-                    # blocks until new message arrives
-                    msg = msgs.get()
-                    print("sending running info...", msg)
+                    print("sending running info...")
                     data = svc.get_running_info_dict(svc.get_running_info())
                     yield format_sse(json.dumps(data), event="runningInfo")
-
+                    time.sleep(5.0)
             response = Response(respond_to_client(), mimetype="text/event-stream")
             response.headers["Access-Control-Allow-Origin"] = "*"
             print("response set up")
