@@ -5,7 +5,7 @@ import services.data_service as svc
 from resources.response import error_json, success_json
 from resources.user_resources import token_required
 from exceptions.exceptions import NotFoundError, InvalidIdError, NoAccessError
-# from resources.message_announcer import announcer
+from resources.message_announcer import announcer
 
 
 def retrieve_running_info_args(args) -> tuple:
@@ -52,5 +52,5 @@ class RunningInfo(Resource):
             return error_json(NoAccessError()), 401
 
         svc.reset_running_info()
-        # announcer.announce("end show success")
+        announcer.announce("end show success")
         return success_json("Deleted", data=None), 204
