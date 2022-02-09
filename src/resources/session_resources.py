@@ -5,7 +5,7 @@ import services.data_service as svc
 from resources.response import error_json, success_json
 from resources.user_resources import token_required
 from exceptions.exceptions import NotFoundError, InvalidIdError, NoAccessError
-# from resources.message_announcer import announcer
+from resources.message_announcer import announcer
 
 
 def retrieve_session_args(args) -> tuple:
@@ -49,7 +49,7 @@ class Session(Resource):
             args = request.json
             date_time, event_id, show_id, is_playing, rooms = retrieve_session_args(args)
             session = svc.create_session(date_time, event_id, show_id)
-            # announcer.announce("create show success")
+            announcer.announce("create show success")
             return success_json(f"Created new session {session.id}", svc.get_session_dict(session)), 201
         except Exception as e:
             return error_json(e), 400
